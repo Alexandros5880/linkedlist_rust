@@ -11,15 +11,14 @@ pub fn main() {
   list.push_back(6);
   list.push_back(7);
 
-  println!("{:#?}", list);
+  // println!("{:#?}", list);
 
-  let index = 7;
-  let data = list.get_by_index(index);
-  match data {
-    Some(data) => println!("list[{}]: {:?}", &index, data),
-    None => println!("Out of Index!")
-  }
-  
+  // let index = 7;
+  // let data = list.get_by_index(index);
+  // match data {
+  //   Some(data) => println!("list[{}]: {:?}", &index, data),
+  //   None => println!("Out of Index!")
+  // }
 
 
   // let data = list.get_by_index(4);
@@ -27,7 +26,8 @@ pub fn main() {
   // let unwraped = data.unwrap();
   // println!("\n\n{}\n\n", unwraped);
 
-  // for item in list {
-  //   println!("Item: {:#?}", item);
-  // }
+  for item in list {
+    println!("Item: {:#?}", item);
+  }
+
 }

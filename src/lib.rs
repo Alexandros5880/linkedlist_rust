@@ -146,6 +146,29 @@ impl<T> LinkedList<T>
     result
   }
 
+  // Private
+  fn get_by_index_local(&mut self, index: usize) -> Option<T> {
+    let node: Option<Rc<RefCell<Node<T>>>>;
+    if index == 0 {
+      node = self.head.clone();
+    } else if index == self.len {
+      node = self.tail.clone();
+    } else if index <= self.len / 2 {
+      self.index = 0;
+      node = self.get_by_index_from_head(self.head.clone(), index);
+    } else {
+      self.index = self.len + 1;
+      node = self.get_by_index_from_tail(self.tail.clone(), index);
+    }
+
+    let result = match node {
+      Some(data) => Some(data.borrow().data.clone()),
+      None => None
+    };
+
+    result
+  }
+
   fn get_by_index_from_head(&mut self, node: Option<Rc<RefCell<Node<T>>>>, index: usize) -> Option<Rc<RefCell<Node<T>>>> {
     let n = node.clone();
     self.index += 1;
@@ -183,26 +206,20 @@ impl<T> LinkedList<T>
 
 }
 
+impl<T> Iterator for LinkedList<T>
+  where T: Display + Debug + Copy
+{
+  type Item = T;
 
-// impl<T> Iterator for LinkedList<T>
-//   where T: Display + Debug + Copy + Default
-// {
-//   type Item = T;
+  fn next(&mut self) -> Option<Self::Item> {
+    if self.index >= self.len {
+      return None
+    }
+    self.index += 1;
+    self.get_by_index_local(self.index)
+  }
 
-//   fn next(&mut self) -> Option<Self::Item> {
-
-//     if self.root.borrow().next.is_some() {
-//       let root = self.root.as_ref();
-//       let next = root.clone().into_inner();
-//       *self.root.borrow_mut() = next;
-//       Some(self.root.borrow().data.to_owned())
-//     } else {
-//       None
-//     }
-
-//   }
-// }
-
+}
 
 
 #[cfg(test)]
@@ -279,6 +296,25 @@ mod tests {
 
     let data = list.get_by_index(9);
     assert_eq!(data.is_none(), true);
+  }
+
+  #[test]
+  fn iterator_works() {
+    let mut list = LinkedList::new();
+    list.push_back(0);
+    list.push_back(1);
+    list.push_back(2);
+    list.push_back(3);
+    list.push_back(4);
+    list.push_back(5);
+    list.push_back(6);
+    list.push_back(7);
+
+    let mut index = 0;
+    for item in list {
+      assert_eq!(item, index);
+      index += 1;
+    }
   }
 
 }
