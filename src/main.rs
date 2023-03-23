@@ -13,10 +13,8 @@ pub fn main() {
 
   // println!("{:#?}", list);
 
-  // for item in list {
-  //   println!("Item: {:#?}", item);
-  // }
-
-  // list[0];
+  for item in list {
+    println!("Item: {:#?}", item);
+  }
 
 }

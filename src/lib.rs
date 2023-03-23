@@ -4,7 +4,6 @@
 use std::rc::Weak;
 use std::{fmt::Display, rc::Rc, cell::RefCell};
 use std::fmt::Debug;
-use std::ops::Index;
 
 // Node
 #[derive(Debug)]
@@ -91,13 +90,11 @@ impl<T> LinkedList<T>
     } else if index == self.len - 1 {
       node = self.tail.clone();
     } else if index <= self.len / 2 {
-      self.index = 0;
       let index = index + 1;
       node = self.get_by_index_from_head(self.head.clone(), index, 0);
     } else {
-      self.index = self.len + 1;
       let index = index + 1;
-      node = self.get_by_index_from_tail(self.tail.clone(), index, 0);
+      node = self.get_by_index_from_tail(self.tail.clone(), index, self.len + 1);
     }
     
     let unwraped = node.unwrap();
@@ -217,21 +214,6 @@ impl<T> Iterator for LinkedList<T>
     self.index += 1;
     self.get_by_index_local(self.index)
   }
-
-}
-
-// Slice Opperator
-impl<T> Index<usize> for LinkedList<T>
-where T: Display + Debug + Copy
-{
-    type Output = Option<T>;
-
-    fn index(&self, index: usize) -> &Self::Output {
-      let index = index + 1;
-      let node = self.get_by_index_local(index);
-      println!("node: {:?}", node);
-      unimplemented!()
-    }
 
 }
 
