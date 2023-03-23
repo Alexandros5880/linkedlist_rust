@@ -4,7 +4,9 @@
 use std::rc::Weak;
 use std::{fmt::Display, rc::Rc, cell::RefCell};
 use std::fmt::Debug;
+use std::ops::Index;
 
+// Node
 #[derive(Debug)]
 struct Node<T>
   where T: Display + Debug + Copy
@@ -26,7 +28,7 @@ impl<T> Node<T>
   }
 }
 
-
+// Linked List
 #[derive(Debug)]
 pub struct LinkedList<T>
   where T: Display + Debug + Copy
@@ -91,11 +93,11 @@ impl<T> LinkedList<T>
     } else if index <= self.len / 2 {
       self.index = 0;
       let index = index + 1;
-      node = self.get_by_index_from_head(self.head.clone(), index);
+      node = self.get_by_index_from_head(self.head.clone(), index, 0);
     } else {
       self.index = self.len + 1;
       let index = index + 1;
-      node = self.get_by_index_from_tail(self.tail.clone(), index);
+      node = self.get_by_index_from_tail(self.tail.clone(), index, 0);
     }
     
     let unwraped = node.unwrap();
@@ -122,20 +124,18 @@ impl<T> LinkedList<T>
     self.len -= 1;
   }
 
-  pub fn get_by_index(&mut self, index: usize) -> Option<T> {
+  pub fn get_by_index(&self, index: usize) -> Option<T> {
     let node: Option<Rc<RefCell<Node<T>>>>;
     if index == 0 {
       node = self.head.clone();
     } else if index == self.len-1 {
       node = self.tail.clone();
     } else if index <= self.len / 2 {
-      self.index = 0;
       let index = index + 1;
-      node = self.get_by_index_from_head(self.head.clone(), index);
+      node = self.get_by_index_from_head(self.head.clone(), index, 0);
     } else {
-      self.index = self.len + 1;
       let index = index + 1;
-      node = self.get_by_index_from_tail(self.tail.clone(), index);
+      node = self.get_by_index_from_tail(self.tail.clone(), index, self.len + 1);
     }
 
     let result = match node {
@@ -143,22 +143,20 @@ impl<T> LinkedList<T>
       None => None
     };
 
-    result
+    result.to_owned()
   }
 
-  // Private
-  fn get_by_index_local(&mut self, index: usize) -> Option<T> {
+  fn get_by_index_local(&self, index: usize) -> Option<T> {
     let node: Option<Rc<RefCell<Node<T>>>>;
+
     if index == 0 {
       node = self.head.clone();
     } else if index == self.len {
       node = self.tail.clone();
     } else if index <= self.len / 2 {
-      self.index = 0;
-      node = self.get_by_index_from_head(self.head.clone(), index);
+      node = self.get_by_index_from_head(self.head.clone(), index, 0);
     } else {
-      self.index = self.len + 1;
-      node = self.get_by_index_from_tail(self.tail.clone(), index);
+      node = self.get_by_index_from_tail(self.tail.clone(), index, self.len + 1);
     }
 
     let result = match node {
@@ -169,32 +167,32 @@ impl<T> LinkedList<T>
     result
   }
 
-  fn get_by_index_from_head(&mut self, node: Option<Rc<RefCell<Node<T>>>>, index: usize) -> Option<Rc<RefCell<Node<T>>>> {
+  fn get_by_index_from_head(&self, node: Option<Rc<RefCell<Node<T>>>>, index: usize, global_index: usize) -> Option<Rc<RefCell<Node<T>>>> {
     let n = node.clone();
-    self.index += 1;
+    let global_index = global_index + 1;
     if node.is_some() {
-      if index == self.index {
+      if index == global_index {
         n
       } else {
         let next = n.unwrap().borrow().next.clone();
-        self.get_by_index_from_head(next, index)
+        self.get_by_index_from_head(next, index, global_index)
       }
     } else {
       None
     }
   }
 
-  fn get_by_index_from_tail(&mut self, node: Option<Rc<RefCell<Node<T>>>>, index: usize) -> Option<Rc<RefCell<Node<T>>>> {
+  fn get_by_index_from_tail(&self, node: Option<Rc<RefCell<Node<T>>>>, index: usize, global_index: usize) -> Option<Rc<RefCell<Node<T>>>> {
     let n = node.clone();
-    self.index -= 1;
+    let global_index = global_index - 1;
     if node.is_some() {
-      if index == self.index {
+      if index == global_index {
         n
       } else {
         let prev = n.unwrap().borrow().prev.clone();
         if prev.is_some() {
           let prev = prev.unwrap().upgrade();
-          self.get_by_index_from_tail(prev, index)
+          self.get_by_index_from_tail(prev, index, global_index)
         } else {
           None
         }
@@ -206,6 +204,7 @@ impl<T> LinkedList<T>
 
 }
 
+// Iterator
 impl<T> Iterator for LinkedList<T>
   where T: Display + Debug + Copy
 {
@@ -221,6 +220,20 @@ impl<T> Iterator for LinkedList<T>
 
 }
 
+// Slice Opperator
+impl<T> Index<usize> for LinkedList<T>
+where T: Display + Debug + Copy
+{
+    type Output = Option<T>;
+
+    fn index(&self, index: usize) -> &Self::Output {
+      let index = index + 1;
+      let node = self.get_by_index_local(index);
+      println!("node: {:?}", node);
+      unimplemented!()
+    }
+
+}
 
 #[cfg(test)]
 mod tests {
