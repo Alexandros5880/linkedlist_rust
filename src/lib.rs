@@ -143,6 +143,27 @@ impl<T> LinkedList<T>
     result.to_owned()
   }
 
+  pub fn excecute_to_all(&self, f: fn(&mut T)) {
+    self.recursive(self.head.to_owned(), f);
+  }
+
+  // TODO: Get By Value.
+  // TODO: Delete by value.
+
+  // private 
+  fn recursive(&self, node: Option<Rc<RefCell<Node<T>>>>, f: fn(&mut T)) -> bool {
+    let result = match node {
+      Some(node) => {
+        let mut bnode = node.borrow_mut();
+        let mut data = &mut bnode.data;
+        f(data);
+        self.recursive(bnode.next.to_owned(), f)
+      },
+      None => false
+    };
+    result
+  }
+
   fn get_by_index_local(&self, index: usize) -> Option<T> {
     let node: Option<Rc<RefCell<Node<T>>>>;
 
@@ -310,6 +331,41 @@ mod tests {
       assert_eq!(item, index);
       index += 1;
     }
+  }
+
+  fn recursive_works() {
+    let mut list = LinkedList::new();
+    list.push_back(0);
+    list.push_back(1);
+    list.push_back(2);
+    list.push_back(3);
+    list.push_back(4);
+    list.push_back(5);
+    list.push_back(6);
+    list.push_back(7);
+
+    list.excecute_to_all(|data| {
+      *data = *data * 2;
+    });
+
+    let item0 = list.get_by_index(0).unwrap();
+    let item1 = list.get_by_index(1).unwrap();
+    let item2 = list.get_by_index(2).unwrap();
+    let item3 = list.get_by_index(3).unwrap();
+    let item4 = list.get_by_index(4).unwrap();
+    let item5 = list.get_by_index(5).unwrap();
+    let item6 = list.get_by_index(6).unwrap();
+    let item7 = list.get_by_index(7).unwrap();
+
+    assert_eq!(item0, 0);
+    assert_eq!(item1, 2);
+    assert_eq!(item2, 4);
+    assert_eq!(item3, 6);
+    assert_eq!(item4, 8);
+    assert_eq!(item5, 10);
+    assert_eq!(item6, 12);
+    assert_eq!(item7, 14);
+
   }
 
 }

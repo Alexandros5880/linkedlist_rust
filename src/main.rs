@@ -11,10 +11,17 @@ pub fn main() {
   list.push_back(6);
   list.push_back(7);
 
-  // println!("{:#?}", list);
+  list.excecute_to_all(|data| {
+    *data = *data * 2;
+  });
 
   for item in list {
     println!("Item: {:#?}", item);
   }
+
+  // let list2 = list.map(|data| data * 2);
+  // for item in list2 {
+  //   println!("Item: {:#?}", item);
+  // }
 
 }
