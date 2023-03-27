@@ -153,11 +153,39 @@ impl<T> LinkedList<T>
     result.to_owned()
   }
 
+  pub fn delete_by_value(&mut self, value: &T) {
+    let node = self.get_by_value_from_head(self.head.clone(), value);
+    
+    if node.is_some() {
+      let unwraped = node.unwrap();
+
+      let prev = unwraped.borrow().prev.clone();
+      let prev = if prev.is_none() {
+        unwraped.clone()
+      } else {
+        prev.unwrap().upgrade().unwrap()
+      };
+      let mut prev_mut = prev.borrow_mut();
+
+      let next = unwraped.borrow().next.clone();
+      let next = if next.is_none() {
+        unwraped.clone()
+      } else {
+        next.unwrap()
+      };
+      let mut next_mut = next.borrow_mut();
+      
+      prev_mut.next = Some(next.to_owned());
+      next_mut.prev = Some(Rc::downgrade(&prev.to_owned()));
+      
+      self.len -= 1;
+    }
+    
+  }
+
   pub fn excecute_to_all(&self, f: fn(&mut T)) {
     self.recursive(self.head.to_owned(), f);
   }
-
-  // TODO: Delete by value.
 
   // private 
   fn recursive(&self, node: Option<Rc<RefCell<Node<T>>>>, f: fn(&mut T)) -> bool {
@@ -316,7 +344,7 @@ mod tests {
   }
 
   #[test]
-  fn delete_works() {
+  fn delete_by_index_works() {
     let mut list = LinkedList::new();
     list.push_back(0);
     list.push_back(1);
@@ -433,6 +461,27 @@ mod tests {
     assert!(val.is_some());
 
     assert_eq!(val.unwrap(), 10);
+  }
+
+  #[test]
+  fn delete_by_value_works() {
+    let mut list = LinkedList::new();
+    list.push_back(0);
+    list.push_back(1);
+    list.push_back(2);
+    list.push_back(3);
+    list.push_back(4);
+    list.push_back(5);
+    list.push_back(6);
+    list.push_back(7);
+
+    list.excecute_to_all(|data| {
+      *data = *data * 2;
+    });
+
+    list.delete_by_value(&10);
+
+    assert_eq!(list.len, 7);
   }
 
 }

@@ -15,12 +15,12 @@ pub fn main() {
     *data = *data * 2;
   });
 
-  // for item in list {
-  //   println!("Item: {:#?}", item);
-  // }
+  for item in list {
+    println!("Item: {:#?}", item);
+  }
 
-  let val = list.get_by_value(&10);
-  println!("Val: {}", &val.unwrap());
+  // list.delete_by_value(&10);
+  // println!("{:#?}", &list);
 
 
   // let list2 = list.map(|data| data * 2);
