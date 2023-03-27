@@ -4,11 +4,12 @@
 use std::rc::Weak;
 use std::{fmt::Display, rc::Rc, cell::RefCell};
 use std::fmt::Debug;
+use std::cmp::PartialEq;
 
 // Node
 #[derive(Debug)]
 struct Node<T>
-  where T: Display + Debug + Copy
+  where T: Display + Debug + Copy + PartialEq
 {
   pub prev: Option<Weak<RefCell<Node<T>>>>,
   pub next: Option<Rc<RefCell<Node<T>>>>,
@@ -16,7 +17,7 @@ struct Node<T>
 }
 
 impl<T> Node<T>
-  where T: Display + Debug + Copy
+  where T: Display + Debug + Copy + PartialEq
 {
   pub fn new(data: T) -> Rc<RefCell<Self>> {
     Rc::new(RefCell::new(Node {
@@ -30,7 +31,7 @@ impl<T> Node<T>
 // Linked List
 #[derive(Debug)]
 pub struct LinkedList<T>
-  where T: Display + Debug + Copy
+  where T: Display + Debug + Copy + PartialEq
 {
   head: Option<Rc<RefCell<Node<T>>>>,
   tail: Option<Rc<RefCell<Node<T>>>>,
@@ -39,7 +40,7 @@ pub struct LinkedList<T>
 }
 
 impl<T> LinkedList<T>
-  where T: Display + Debug + Copy
+  where T: Display + Debug + Copy + PartialEq
 {
 
   pub fn new() -> LinkedList<T> {
@@ -143,11 +144,19 @@ impl<T> LinkedList<T>
     result.to_owned()
   }
 
+  pub fn get_by_value(&self, value: &T) -> Option<T> {
+    let node = self.get_by_value_from_head(self.head.clone(), value);
+    let result = match node {
+      Some(data) => Some(data.borrow().data.clone()),
+      None => None
+    };
+    result.to_owned()
+  }
+
   pub fn excecute_to_all(&self, f: fn(&mut T)) {
     self.recursive(self.head.to_owned(), f);
   }
 
-  // TODO: Get By Value.
   // TODO: Delete by value.
 
   // private 
@@ -155,7 +164,7 @@ impl<T> LinkedList<T>
     let result = match node {
       Some(node) => {
         let mut bnode = node.borrow_mut();
-        let mut data = &mut bnode.data;
+        let data = &mut bnode.data;
         f(data);
         self.recursive(bnode.next.to_owned(), f)
       },
@@ -220,11 +229,45 @@ impl<T> LinkedList<T>
     }
   }
 
+  fn get_by_value_from_head(&self, node: Option<Rc<RefCell<Node<T>>>>, value: &T) -> Option<Rc<RefCell<Node<T>>>> {
+    let n = node.clone();
+    if node.is_some() {
+      let val = node.unwrap().borrow().data;
+      if val == *value {
+        n
+      } else {
+        let next = n.unwrap().borrow().next.clone();
+        self.get_by_value_from_head(next, value)
+      }
+    } else {
+      None
+    }
+  }
+
+  fn get_by_value_from_tail(&self, node: Option<Rc<RefCell<Node<T>>>>, value: &T) -> Option<Rc<RefCell<Node<T>>>> {
+    let n = node.clone();
+    if node.is_some() {
+      let val = node.unwrap().borrow().data;
+      if val == *value {
+        n
+      } else {
+        let prev = n.unwrap().borrow().prev.clone();
+        if prev.is_some() {
+          let prev = prev.unwrap().upgrade();
+          self.get_by_value_from_tail(prev, value)
+        } else {
+          None
+        }
+      }
+    } else {
+      None
+    }
+  }
 }
 
 // Iterator
 impl<T> Iterator for LinkedList<T>
-  where T: Display + Debug + Copy
+  where T: Display + Debug + Copy + PartialEq
 {
   type Item = T;
 
@@ -333,6 +376,7 @@ mod tests {
     }
   }
 
+  #[test]
   fn recursive_works() {
     let mut list = LinkedList::new();
     list.push_back(0);
@@ -366,6 +410,29 @@ mod tests {
     assert_eq!(item6, 12);
     assert_eq!(item7, 14);
 
+  }
+
+  #[test]
+  fn get_by_value_works() {
+    let mut list = LinkedList::new();
+    list.push_back(0);
+    list.push_back(1);
+    list.push_back(2);
+    list.push_back(3);
+    list.push_back(4);
+    list.push_back(5);
+    list.push_back(6);
+    list.push_back(7);
+
+    list.excecute_to_all(|data| {
+      *data = *data * 2;
+    });
+
+    let val = list.get_by_value(&10);
+
+    assert!(val.is_some());
+
+    assert_eq!(val.unwrap(), 10);
   }
 
 }
