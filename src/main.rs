@@ -1,4 +1,4 @@
-use linkedlist::LinkedList;
+use linked_lista::LinkedList;
 
 pub fn main() {
   let mut list = LinkedList::new();
@@ -18,14 +18,5 @@ pub fn main() {
   for item in list {
     println!("Item: {:#?}", item);
   }
-
-  // list.delete_by_value(&10);
-  // println!("{:#?}", &list);
-
-
-  // let list2 = list.map(|data| data * 2);
-  // for item in list2 {
-  //   println!("Item: {:#?}", item);
-  // }
 
 }

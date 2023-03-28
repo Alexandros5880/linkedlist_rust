@@ -28,6 +28,7 @@ impl<T> Node<T>
   }
 }
 
+/// # My LinkedList
 // Linked List
 #[derive(Debug)]
 pub struct LinkedList<T>
