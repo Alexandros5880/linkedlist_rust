@@ -183,11 +183,12 @@ impl<T> LinkedList<T>
     
   }
 
+  /// Executes a closure to every node
   pub fn excecute_to_all(&self, f: fn(&mut T)) {
     self.recursive(self.head.to_owned(), f);
   }
 
-  // private 
+  /// Private functions 
   fn recursive(&self, node: Option<Rc<RefCell<Node<T>>>>, f: fn(&mut T)) -> bool {
     let result = match node {
       Some(node) => {
